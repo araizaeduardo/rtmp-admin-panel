@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  rtmp-scheduler:
+    build: .
+    volumes:
+      - ./videos:/app/videos
+      - ./db:/app/db
+    ports:
+      - "1935:1935"
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    # Opcional: agregar healthcheck si tu aplicación lo soporta
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:1935"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3

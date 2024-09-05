@@ -194,3 +194,62 @@ Para ejecutar el script, usa el siguiente comando:
    ```
 
 Nota: Asegúrate de que el archivo de base de datos `rtmp_manager.db` esté en el mismo directorio que el Dockerfile antes de construir la imagen.
+
+## Uso con Stunnel para conexiones seguras
+
+Si necesitas transmitir a través de una conexión segura (RTMPS), puedes usar Stunnel como un proxy TLS. Sigue estos pasos:
+
+1. Instala Stunnel:
+
+   ```bash
+   sudo apt-get install stunnel4
+   ```
+
+2. Crea un archivo de configuración para Stunnel:
+
+   ```bash
+   sudo nano /etc/stunnel/stunnel.conf
+   ```
+
+3. Agrega la siguiente configuración:
+
+   ```
+   [rtmp-out]
+   client = yes
+   accept = 127.0.0.1:1936
+   connect = rtmp-server.example.com:443
+   verify = 0
+   ```
+
+   Reemplaza `rtmp-server.example.com` con el dominio del servidor RTMP al que quieres conectarte.
+
+4. Inicia Stunnel:
+
+   ```bash
+   sudo service stunnel4 start
+   ```
+
+5. Modifica tu script `rtmp_scheduler.sh` para usar el puerto local de Stunnel:
+
+   ```bash
+   ffmpeg -re -i "$video_path" -c copy -f flv rtmp://127.0.0.1:1936/live/stream &
+   ```
+
+6. Actualiza la configuración de Nginx para escuchar en el puerto local de Stunnel:
+
+   ```nginx
+   rtmp {
+       server {
+           listen 1936;
+           // ... rest of the configuration ...
+       }
+   }
+   ```
+
+7. Reinicia Nginx:
+
+   ```bash
+   sudo systemctl restart nginx
+   ```
+
+Ahora, cuando ejecutes el script, la transmisión se enviará a través de Stunnel, que manejará la conexión segura al servidor RTMP.

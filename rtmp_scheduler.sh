@@ -25,7 +25,8 @@ do
         youtube_pid=$!
     fi
     if [ -n "$facebook_rtmp" ]; then
-        ffmpeg -re -i "$video_path" -c copy -f flv "$facebook_rtmp" &
+        # Usar stunnel para Facebook
+        ffmpeg -re -i "$video_path" -c copy -f flv "rtmp://127.0.0.1:1936/rtmp/$facebook_rtmp" &
         facebook_pid=$!
     fi
     if [ -n "$custom_rtmp" ]; then
